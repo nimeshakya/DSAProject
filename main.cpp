@@ -518,6 +518,18 @@ void close()
 	SDL_Quit();
 }
 
+int randomRangeMultiple(bool isXAxis)
+{
+	std::random_device rd;
+	std::mt19937 generator{ rd() };
+
+	std::uniform_int_distribution<int> distribution(0, ((isXAxis ? SCREEN_WIDTH : SCREEN_HEIGHT) - FOOD_WIDTH));
+
+	int randomNum = distribution(generator);
+
+	return (randomNum / FOOD_WIDTH) * FOOD_WIDTH;
+}
+
 int main(int argc, char* argv[])
 {
 	if (!init())
@@ -551,8 +563,8 @@ int main(int argc, char* argv[])
 			}
 
 			Food food;
-			int foodSpawnX{ std::rand() % (SCREEN_WIDTH + 1) / FOOD_WIDTH * FOOD_WIDTH };
-			int foodSpawnY{ std::rand() % (SCREEN_HEIGHT + 1) / FOOD_WIDTH * FOOD_WIDTH };
+			int foodSpawnX{ randomRangeMultiple(true) };
+			int foodSpawnY{ randomRangeMultiple(false) };
 			food.updateFoodPos(foodSpawnX, foodSpawnY);
 			bool foodconsumed{ false };
 
@@ -592,24 +604,27 @@ int main(int argc, char* argv[])
 								snake.insertNode(point);
 							}
 							snake.reset();
+							foodSpawnX = randomRangeMultiple(true);
+							foodSpawnY = randomRangeMultiple(false);
+							food.updateFoodPos(foodSpawnX, foodSpawnY);
 							goodToTakeInput = true;
 						}
 					}
 				}
 				// update
-				if (!collided)
+ 				if (!collided)
 				{
 					if (snake.head->bodyRect.x == food.foodRect.x && snake.head->bodyRect.y == food.foodRect.y)
 					{
 						foodconsumed = true;
 						SDL_Point newpoint = { snake.head->nextBody->bodyRect.x, snake.head->nextBody->bodyRect.y };
 						snake.insertNode(newpoint);
-						foodSpawnX = std::rand() % (SCREEN_WIDTH + 1) / FOOD_WIDTH * FOOD_WIDTH;
-						foodSpawnY = std::rand() % (SCREEN_HEIGHT + 1) / FOOD_WIDTH * FOOD_WIDTH;
+						foodSpawnX = randomRangeMultiple(true);
+						foodSpawnY = randomRangeMultiple(false);
 						while (snake.isPositionOfPart(foodSpawnX, foodSpawnY))
 						{
-							foodSpawnX = std::rand() % (SCREEN_WIDTH + 1) / FOOD_WIDTH * FOOD_WIDTH;
-							foodSpawnY = std::rand() % (SCREEN_HEIGHT + 1) / FOOD_WIDTH * FOOD_WIDTH;
+							foodSpawnX = randomRangeMultiple(true);
+							foodSpawnY = randomRangeMultiple(false);
 						}
 						food.updateFoodPos(foodSpawnX, foodSpawnY);
 						score++;
